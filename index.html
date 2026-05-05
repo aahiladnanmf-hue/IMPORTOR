@@ -1,651 +1,846 @@
 <!DOCTYPE html>
-<html lang="pt">
 
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Impostor Words</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Impostor Who?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* === DESIGN & CORES === */
         :root {
-            --primary: #4F46E5;
-            --secondary: #10B981;
-            --danger: #EF4444;
-            --bg-color: #F3F4F6;
-            --text-dark: #1F2937;
+            --primary: #FF3CAC;
+            --secondary: #00F5A0;
+            --danger: #FF4D4D;
+            --accent: #FFDE03;
+            --bg: #0D0D1A;
             --text-light: #FFFFFF;
+            --text-muted: rgba(255,255,255,0.55);
+            --surface: rgba(255,255,255,0.06);
+            --border: rgba(255,255,255,0.1);
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
 
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-dark);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            text-align: center;
-            overflow-x: hidden;
-            transition: background-color 0.3s ease;
-        }
+```
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-        .screen {
-            display: none;
-            width: 100%;
-            max-width: 400px;
-            padding: 20px;
-            box-sizing: border-box;
-            animation: fadeIn 0.3s ease-in-out;
-        }
+    html, body { width: 100%; height: 100%; overflow-x: hidden; }
 
-        .screen.active {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 5vh;
-        }
+    body {
+        font-family: 'Lora', serif;
+        background: var(--bg);
+        color: var(--text-light);
+        min-height: 100svh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+    }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
+    body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background:
+            radial-gradient(ellipse at 20% 20%, rgba(255,60,172,0.13) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 80%, rgba(0,245,160,0.08) 0%, transparent 50%),
+            radial-gradient(ellipse at 50% 50%, rgba(120,75,160,0.08) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: 0;
+    }
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+    /* ===== SCREENS ===== */
+    .screen {
+        display: none;
+        width: 100%;
+        max-width: 480px;
+        padding: 24px 20px calc(24px + var(--safe-bottom));
+        padding-top: calc(20px + var(--safe-top));
+        flex-direction: column;
+        gap: 14px;
+        position: relative;
+        z-index: 1;
+    }
 
-        /* === BOTÕES REAIS === */
-        button {
-            padding: 16px 20px;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            transition: transform 0.1s, box-shadow 0.1s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+    .screen.active { display: flex; animation: slideUp 0.35s cubic-bezier(0.34,1.3,0.64,1); }
 
-        button:active {
-            transform: scale(0.96);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+    #screen-card {
+        height: 100svh;
+        padding: 16px 18px calc(16px + var(--safe-bottom));
+        padding-top: calc(12px + var(--safe-top));
+        justify-content: space-between;
+        overflow: hidden;
+    }
 
-        .btn-primary {
-            background-color: var(--primary);
-            color: var(--text-light);
-        }
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(22px) scale(0.97); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
 
-        .btn-secondary {
-            background-color: var(--secondary);
-            color: var(--text-light);
-        }
+    /* ===== LOGO ===== */
+    .logo {
+        font-family: 'Playfair Display', serif;
+        font-weight: 900;
+        font-size: clamp(38px, 12vw, 54px);
+        letter-spacing: 2px;
+        line-height: 1;
+        text-align: center;
+        background: linear-gradient(135deg, #FF3CAC, #FFDE03, #00F5A0);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        filter: drop-shadow(0 0 16px rgba(255,60,172,0.45));
+    }
 
-        .btn-danger {
-            background-color: var(--danger);
-            color: var(--text-light);
-            border: 2px solid white;
-        }
+    .logo-sub {
+        font-family: 'Lora', serif;
+        font-size: clamp(12px, 3.5vw, 15px);
+        font-weight: 600;
+        letter-spacing: 5px;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 4px;
+        text-transform: uppercase;
+    }
 
-        .btn-outline {
-            background-color: transparent;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            box-shadow: none;
-        }
+    /* ===== TITLES ===== */
+    h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(24px, 6.5vw, 32px);
+        font-weight: 700;
+        text-align: center;
+        color: #fff;
+        letter-spacing: 0.5px;
+    }
 
-        /* === ELEMENTOS EXTRAS === */
-        input[type="text"],
-        select {
-            padding: 14px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            font-size: 16px;
-            width: 100%;
-            box-sizing: border-box;
-            font-family: inherit;
-        }
+    p {
+        font-size: clamp(14px, 3.8vw, 16px);
+        color: var(--text-muted);
+        font-weight: 500;
+        text-align: center;
+        line-height: 1.6;
+    }
 
-        .player-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            text-align: left;
-            max-height: 200px;
-            overflow-y: auto;
-        }
+    /* ===== BUTTONS ===== */
+    button {
+        font-family: 'Lora', serif;
+        font-weight: 700;
+        letter-spacing: 1px;
+        padding: 15px 18px;
+        border: none;
+        border-radius: 14px;
+        font-size: clamp(15px, 4.2vw, 18px);
+        cursor: pointer;
+        width: 100%;
+        transition: transform 0.12s, filter 0.12s, opacity 0.12s;
+        position: relative;
+        overflow: hidden;
+        touch-action: manipulation;
+    }
 
-        .player-list li {
-            background: #fff;
-            padding: 10px;
-            margin-bottom: 5px;
-            border-radius: 8px;
-            font-weight: bold;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-            display: flex;
-            justify-content: space-between;
-        }
+    button::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom, rgba(255,255,255,0.13), transparent);
+        pointer-events: none;
+    }
 
-        .impostor-selector {
-            background: #fff;
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-            margin-bottom: 10px;
-        }
+    button:active { transform: scale(0.96); }
 
-        /* === CARTÃO DE REVELAÇÃO === */
-        .card-container {
-            width: 100%;
-            height: 60vh;
-            min-height: 350px;
-            border-radius: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 30px;
-            box-sizing: border-box;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
+    .btn-primary   { background: linear-gradient(135deg,#FF3CAC,#784BA0); color:#fff; box-shadow: 0 4px 20px rgba(255,60,172,0.35); }
+    .btn-secondary { background: linear-gradient(135deg,#00F5A0,#00D2FF); color:#0D0D1A; box-shadow: 0 4px 20px rgba(0,245,160,0.3); }
+    .btn-accent    { background: linear-gradient(135deg,#FFDE03,#FF8C00); color:#0D0D1A; box-shadow: 0 4px 20px rgba(255,222,3,0.3); }
+    .btn-danger    { background: linear-gradient(135deg,#FF4D4D,#C0392B); color:#fff; box-shadow: 0 4px 20px rgba(255,77,77,0.35); }
+    .btn-outline   { background: transparent; border: 1.5px solid rgba(255,255,255,0.22); color: rgba(255,255,255,0.65); font-size: clamp(14px,3.8vw,16px); box-shadow: none; }
+    .btn-outline:hover { border-color:rgba(255,255,255,0.45); color:#fff; }
 
-        /* Efeito de brilho de fundo no cartão estilo a imagem */
-        .card-container::before {
-            content: "";
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 70%);
-            pointer-events: none;
-        }
+    /* ===== INPUTS ===== */
+    input[type="text"], select {
+        font-family: 'Lora', serif;
+        padding: 14px 16px;
+        border-radius: 12px;
+        border: 1.5px solid var(--border);
+        font-size: 16px;
+        font-weight: 600;
+        width: 100%;
+        background: var(--surface);
+        color: #fff;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        -webkit-appearance: none;
+        appearance: none;
+    }
 
-        .card-title {
-            font-size: 32px;
-            font-weight: 900;
-            margin: 0 0 10px 0;
-            text-transform: uppercase;
-        }
+    input[type="text"]::placeholder { color: rgba(255,255,255,0.3); }
+    input[type="text"]:focus, select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(255,60,172,0.18);
+    }
 
-        .card-subtitle {
-            font-size: 16px;
-            margin-bottom: 40px;
-            opacity: 0.9;
-        }
+    select option { background: #1A1A2E; color:#fff; }
 
-        .card-action-icon {
-            font-size: 50px;
-            margin-bottom: 10px;
-            animation: pulse 1.5s infinite;
-        }
+    /* ===== PLAYER / WORD LISTS ===== */
+    .player-list {
+        list-style: none;
+        max-height: 36vmax;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        -webkit-overflow-scrolling: touch;
+    }
 
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
+    .player-list::-webkit-scrollbar { width: 3px; }
+    .player-list::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 2px; }
 
-            50% {
-                transform: scale(1.1);
-            }
+    .player-list li {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        padding: 12px 14px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: 'Lora', serif;
+    }
 
-            100% {
-                transform: scale(1);
-            }
-        }
+    .remove-btn {
+        background: none; border: none;
+        color: #FF4D4D; cursor: pointer;
+        font-size: 16px; width: auto;
+        padding: 4px 8px;
+        box-shadow: none; line-height: 1; letter-spacing: 0;
+        touch-action: manipulation;
+        font-family: sans-serif;
+    }
+    .remove-btn::after { display: none; }
 
-        .card-action-text {
-            font-weight: bold;
-            font-size: 18px;
-            text-transform: uppercase;
-        }
+    /* ===== CATEGORIES GRID ===== */
+    #categories-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
 
-        .secret-word-revealed {
-            font-size: 40px;
-            font-weight: 900;
-            text-transform: uppercase;
-            display: none;
-            /* Escondido até clicar */
-        }
-        
-        /* Estilo para destacar quem começa a rodada */
-        .starter-highlight {
-            font-size: 1.5rem; 
-            font-weight: bold; 
-            color: var(--primary); 
-            margin: 20px 0; 
-            background: #fff; 
-            padding: 15px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-    </style>
+    #categories-container button {
+        font-size: clamp(13px, 3.8vw, 16px);
+        padding: 14px 8px;
+        letter-spacing: 0.5px;
+    }
+
+    .cat-btn-0  { background: linear-gradient(135deg,#FF3CAC,#784BA0); color:#fff; box-shadow:0 4px 12px rgba(255,60,172,0.3); }
+    .cat-btn-1  { background: linear-gradient(135deg,#00F5A0,#00D2FF); color:#0D0D1A; box-shadow:0 4px 12px rgba(0,245,160,0.3); }
+    .cat-btn-2  { background: linear-gradient(135deg,#FFDE03,#FF8C00); color:#0D0D1A; box-shadow:0 4px 12px rgba(255,222,3,0.3); }
+    .cat-btn-3  { background: linear-gradient(135deg,#2B86C5,#6A3DE8); color:#fff; box-shadow:0 4px 12px rgba(43,134,197,0.3); }
+    .cat-btn-4  { background: linear-gradient(135deg,#FF6B6B,#FF8E53); color:#fff; box-shadow:0 4px 12px rgba(255,107,107,0.3); }
+    .cat-btn-5  { background: linear-gradient(135deg,#A8FF78,#78FFD6); color:#0D0D1A; box-shadow:0 4px 12px rgba(168,255,120,0.3); }
+    .cat-btn-6  { background: linear-gradient(135deg,#f953c6,#b91d73); color:#fff; box-shadow:0 4px 12px rgba(249,83,198,0.3); }
+    .cat-btn-7  { background: linear-gradient(135deg,#43E97B,#38F9D7); color:#0D0D1A; box-shadow:0 4px 12px rgba(67,233,123,0.3); }
+    .cat-btn-8  { background: linear-gradient(135deg,#FA8231,#f7b733); color:#0D0D1A; box-shadow:0 4px 12px rgba(250,130,49,0.3); }
+    .cat-btn-9  { background: linear-gradient(135deg,#30CFD0,#330867); color:#fff; box-shadow:0 4px 12px rgba(48,207,208,0.3); }
+    .cat-btn-10 { background: linear-gradient(135deg,#FF512F,#DD2476); color:#fff; box-shadow:0 4px 12px rgba(255,81,47,0.3); }
+
+    /* ===== GAME CARD ===== */
+    .card-container {
+        flex: 1;
+        width: 100%;
+        border-radius: 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 28px 22px 50px;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: none;
+    }
+
+    .card-container::before {
+        content:'';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.22) 0%, transparent 60%);
+        pointer-events: none;
+    }
+
+    .card-title {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(28px, 8vw, 40px);
+        font-weight: 900;
+        color: rgba(0,0,0,0.85);
+        text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        margin-bottom: 6px;
+        text-align: center;
+        letter-spacing: 0.5px;
+    }
+
+    .card-subtitle {
+        font-family: 'Lora', serif;
+        font-size: clamp(12px, 3.2vw, 14px);
+        font-weight: 600;
+        color: rgba(0,0,0,0.55);
+        margin-bottom: 28px;
+        text-align: center;
+    }
+
+    .card-action-icon {
+        font-size: clamp(44px,12vw,58px);
+        animation: bounce 1.2s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+        0%,100% { transform: translateY(0); }
+        50%      { transform: translateY(-10px); }
+    }
+
+    .card-action-text {
+        font-family: 'Lora', serif;
+        font-size: clamp(14px, 4vw, 17px);
+        font-weight: 700;
+        color: rgba(0,0,0,0.65);
+        margin-top: 8px;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+    }
+
+    .tap-hint {
+        position: absolute;
+        bottom: 16px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        color: rgba(0,0,0,0.35);
+        text-transform: uppercase;
+        white-space: nowrap;
+        font-family: 'Lora', serif;
+    }
+
+    .secret-word-revealed {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(36px, 10vw, 52px);
+        font-weight: 900;
+        color: rgba(0,0,0,0.9);
+        text-align: center;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        display: none;
+        animation: wordPop 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    @keyframes wordPop {
+        from { transform: scale(0.5); opacity:0; }
+        to   { transform: scale(1); opacity:1; }
+    }
+
+    .impostor-label {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(36px, 10vw, 52px);
+        font-weight: 900;
+        color: #fff;
+        text-shadow: 0 0 30px rgba(255,255,255,0.8), 0 4px 15px rgba(0,0,0,0.5);
+        display: none;
+        text-align: center;
+        animation: wordPop 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    #btn-next-player { flex-shrink: 0; margin-top: 10px; }
+
+    /* ===== CARD THEMES ===== */
+    .card-theme-0 { background: linear-gradient(135deg,#FDE047,#F59E0B); }
+    .card-theme-1 { background: linear-gradient(135deg,#6EE7B7,#059669); }
+    .card-theme-2 { background: linear-gradient(135deg,#93C5FD,#2563EB); }
+    .card-theme-3 { background: linear-gradient(135deg,#F9A8D4,#DB2777); }
+    .card-theme-4 { background: linear-gradient(135deg,#C4B5FD,#7C3AED); }
+    .card-theme-5 { background: linear-gradient(135deg,#FDBA74,#EA580C); }
+    .card-theme-6 { background: linear-gradient(135deg,#D9F99D,#65A30D); }
+    .card-impostor { background: linear-gradient(135deg,#FF4D4D,#7F0000) !important; }
+    .card-impostor .card-title    { color: rgba(255,255,255,0.9); }
+    .card-impostor .card-subtitle { color: rgba(255,255,255,0.6); }
+
+    /* ===== DISCUSSION ===== */
+    .discussion-icon {
+        font-size: clamp(56px,16vw,72px);
+        text-align: center;
+        animation: wiggle 2s ease-in-out infinite;
+    }
+
+    @keyframes wiggle {
+        0%,100% { transform: rotate(-5deg); }
+        50%      { transform: rotate(5deg);  }
+    }
+
+    .starter-highlight {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(20px, 5.5vw, 26px);
+        font-weight: 700;
+        background: linear-gradient(135deg,#FFDE03,#FF8C00);
+        color: #0D0D1A;
+        padding: 16px 18px;
+        border-radius: 16px;
+        text-align: center;
+        box-shadow: 0 4px 18px rgba(255,222,3,0.3);
+    }
+
+    /* ===== MISC ===== */
+    .input-row { display: flex; gap: 8px; align-items: stretch; }
+    .input-row input { flex: 1; }
+    .input-row button { width: auto; padding: 0 20px; font-size: 22px; flex-shrink: 0; }
+
+    .impostor-selector {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 16px 18px;
+    }
+
+    .impostor-selector label {
+        display: block;
+        font-family: 'Playfair Display', serif;
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--accent);
+        margin-bottom: 10px;
+    }
+
+    .divider { height: 1px; background: rgba(255,255,255,0.08); }
+
+    /* ===== CUSTOM WORDS NOTICE ===== */
+    .words-notice {
+        background: rgba(0,245,160,0.08);
+        border: 1px solid rgba(0,245,160,0.25);
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 14px;
+        color: #00F5A0;
+        text-align: center;
+        font-weight: 600;
+        font-family: 'Lora', serif;
+    }
+
+    /* ===== INFO BOX ===== */
+    .info-box {
+        background: rgba(255,222,3,0.08);
+        border: 1px solid rgba(255,222,3,0.22);
+        border-radius: 12px;
+        padding: 14px 16px;
+        font-size: 14px;
+        color: rgba(255,255,255,0.75);
+        font-family: 'Lora', serif;
+        font-weight: 500;
+        line-height: 1.6;
+        text-align: left;
+    }
+
+    .info-box strong {
+        color: var(--accent);
+        font-weight: 700;
+    }
+</style>
+```
+
 </head>
-
 <body>
 
-    <div id="screen-home" class="screen active">
-        <div
-            style="background: #EAFB04; padding: 10px; border-radius: 12px; display: inline-block; width: fit-content; margin: 0 auto; font-weight: 900; color: #000; line-height: 1; font-size: 24px;">
-            IMPOSTER<br>WHO?
-        </div>
-        <p>Descobre quem não sabe a palavra secreta!</p>
+<!-- ===== ECRÃ INICIAL ===== -->
 
-        <div class="impostor-selector">
-            <label for="num-impostors" style="font-weight: bold; display: block; margin-bottom: 10px;">Quantidade de
-                Impostores:</label>
-            <select id="num-impostors">
-                <option value="1" selected>1 Impostor</option>
-                <option value="2">2 Impostores</option>
-                <option value="3">3 Impostores</option>
-                <option value="4">4 Impostores</option>
-                <option value="5">5 Impostores</option>
-            </select>
-        </div>
-
-        <button class="btn-primary" onclick="goToScreen('screen-players')">Jogar Agora</button>
+<div id="screen-home" class="screen active">
+    <div style="margin: 10px auto 0;">
+        <div class="logo">IMPOSTOR</div>
+        <div class="logo-sub">Who? 🔍</div>
     </div>
+    <p>Descobre quem não sabe a palavra secreta!</p>
 
-    <div id="screen-players" class="screen">
-        <h2>Adicionar Jogadores</h2>
+```
+<div class="impostor-selector">
+    <label for="num-impostors">🕵️ Quantos impostores haverá?</label>
+    <select id="num-impostors">
+        <option value="1" selected>1 Impostor</option>
+        <option value="2">2 Impostores</option>
+        <option value="3">3 Impostores</option>
+        <option value="4">4 Impostores</option>
+        <option value="5">5 Impostores</option>
+    </select>
+</div>
+
+<button class="btn-primary" onclick="goToScreen('screen-players')">🎮 Iniciar Jogo</button>
+```
+
+</div>
+
+<!-- ===== ECRÃ DE JOGADORES ===== -->
+
+<div id="screen-players" class="screen">
+    <h2>👥 Adicionar Jogadores</h2>
+    <p>Escreve o nome de cada pessoa que vai jogar e prime o <strong style="color:#00F5A0">+</strong></p>
+    <div class="input-row">
         <input type="text" id="player-input" placeholder="Nome do jogador..." onkeypress="handleEnter(event)">
-        <button class="btn-secondary" onclick="addPlayer()">Adicionar</button>
-        <ul id="player-list-ul" class="player-list"></ul>
-        <button class="btn-primary" onclick="goToCategories()" style="margin-top: 10px;">Continuar</button>
-        <button class="btn-outline" onclick="goToScreen('screen-home')">Voltar</button>
+        <button class="btn-secondary" onclick="addPlayer()" style="border-radius:12px;">+</button>
+    </div>
+    <ul id="player-list-ul" class="player-list"></ul>
+    <div class="divider"></div>
+    <button class="btn-accent" onclick="goToCategories()">Continuar →</button>
+    <button class="btn-outline" onclick="goToScreen('screen-home')">← Voltar</button>
+</div>
+
+<!-- ===== ECRÃ DE CATEGORIAS ===== -->
+
+<div id="screen-categories" class="screen">
+    <h2>🗂️ Escolhe a Categoria</h2>
+    <p>A palavra secreta será retirada da categoria que escolheres.</p>
+    <div id="categories-container"></div>
+    <button class="btn-outline" onclick="goToScreen('screen-players')" style="margin-top:4px;">← Voltar</button>
+</div>
+
+<!-- ===== ECRÃ DE ESCOLHA ALEATÓRIA ===== -->
+
+<div id="screen-random-choice" class="screen">
+    <h2>🎲 Modo Livre</h2>
+    <p>Podes usar palavras aleatórias do jogo, ou criar as tuas próprias palavras personalizadas.</p>
+
+```
+<div id="saved-words-notice" class="words-notice" style="display:none;">
+    ✅ Tens <span id="saved-words-count">0</span> palavras guardadas prontas a usar!
+</div>
+
+<button class="btn-primary" onclick="showCustomWordsScreen()">✏️ Criar as minhas palavras</button>
+<button class="btn-secondary" onclick="startGame('Aleatório')">🎲 Usar palavras aleatórias</button>
+<button class="btn-outline" onclick="goToScreen('screen-categories')">← Voltar</button>
+```
+
+</div>
+
+<!-- ===== ECRÃ DE PALAVRAS PERSONALIZADAS ===== -->
+
+<div id="screen-custom-words" class="screen">
+    <h2>✏️ As Minhas Palavras</h2>
+
+```
+<div class="info-box">
+    <strong>Como funciona:</strong><br>
+    1. Escreve uma palavra e prime o <strong style="color:#FFDE03">+</strong><br>
+    2. Adiciona entre 5 e 50 palavras<br>
+    3. Quando tiveres pronto, prime <strong style="color:#FFDE03">Começar o Jogo</strong><br>
+    As tuas palavras ficam guardadas enquanto não saíres do jogo.
+</div>
+
+<div class="input-row">
+    <input type="text" id="custom-word-input" placeholder="Escreve uma palavra..." onkeypress="if(event.key==='Enter') addCustomWord()">
+    <button class="btn-accent" onclick="addCustomWord()" style="border-radius:12px;">+</button>
+</div>
+<ul id="custom-words-list" class="player-list" style="min-height:50px;"></ul>
+<p style="font-size:0.9rem;">Total: <span id="custom-words-count" style="color:var(--accent);">0</span> / 50 palavras</p>
+<button class="btn-primary" onclick="startCustomGame()">🚀 Começar o Jogo com Estas Palavras</button>
+<button class="btn-outline" onclick="goToScreen('screen-random-choice')">← Voltar</button>
+```
+
+</div>
+
+<!-- ===== ECRÃ DA CARTA (CARTÃO DE CADA JOGADOR) ===== -->
+
+<div id="screen-card" class="screen">
+    <div id="player-card" class="card-container card-theme-0">
+        <h1 id="card-player-name" class="card-title">Jogador</h1>
+        <p id="card-instruction" class="card-subtitle">Não mostres esta carta a ninguém.</p>
+
+```
+    <div id="card-action">
+        <div class="card-action-icon">👆</div>
+        <div class="card-action-text">Toca para Ver</div>
     </div>
 
-    <div id="screen-categories" class="screen">
-        <h2>Escolha a Categoria</h2>
-        <div id="categories-container" style="display: flex; flex-direction: column; gap: 10px;">
-        </div>
-        <button class="btn-outline" onclick="goToScreen('screen-players')" style="margin-top: 15px;">Voltar aos
-            Jogadores</button>
-    </div>
+    <div id="card-word" class="secret-word-revealed"></div>
+    <div id="card-impostor" class="impostor-label">🚨 Impostor! 🚨</div>
 
-    <div id="screen-random-choice" class="screen">
-        <h2>Modo Aleatório</h2>
-        <p>O que desejas fazer?</p>
-        <button class="btn-primary" onclick="showCustomWordsScreen()">Criar minhas palavras</button>
-        <button class="btn-secondary" style="margin-top: 10px;" onclick="startGame('Aleatório')">Jogar com Palavras Aleatórias</button>
-        <button class="btn-outline" style="margin-top: 15px;" onclick="goToScreen('screen-categories')">Voltar</button>
-    </div>
+    <div class="tap-hint" id="tap-hint">mantém pressionado para ver · solta para esconder</div>
+</div>
 
-    <div id="screen-custom-words" class="screen">
-        <h2>Tuas Palavras</h2>
-        <p style="font-size: 0.9rem;">Cria entre 5 a 50 palavras para o jogo.</p>
-        <div style="display: flex; gap: 5px;">
-            <input type="text" id="custom-word-input" placeholder="Escreve uma palavra..." onkeypress="if(event.key === 'Enter') addCustomWord()">
-            <button class="btn-secondary" style="width: auto; padding: 0 20px;" onclick="addCustomWord()">+</button>
-        </div>
-        <ul id="custom-words-list" class="player-list" style="margin-top: 10px; min-height: 50px;"></ul>
-        <p style="font-weight: bold; margin: 5px 0;">Total: <span id="custom-words-count">0</span> / 50</p>
-        <button class="btn-primary" style="margin-top: 10px;" onclick="startCustomGame()">Jogar com estas palavras</button>
-        <button class="btn-outline" style="margin-top: 10px;" onclick="goToScreen('screen-random-choice')">Voltar</button>
-    </div>
+<button id="btn-next-player" class="btn-accent" onclick="nextPlayer()">
+    Próximo Jogador →
+</button>
+```
 
-    <div id="screen-card" class="screen">
-        <div id="player-card" class="card-container" onclick="revealCard()">
-            <h1 id="card-player-name" class="card-title">JOGADOR 1</h1>
-            <p id="card-instruction" class="card-subtitle">Não diga a palavra para os outros jogadores.</p>
+</div>
 
-            <div id="card-action">
-                <div class="card-action-icon">👆</div>
-                <div class="card-action-text">TOQUE PARA REVELAR</div>
-            </div>
+<!-- ===== ECRÃ DE DISCUSSÃO ===== -->
 
-            <div id="card-word" class="secret-word-revealed">
-                PALAVRA SECRETA
-            </div>
-        </div>
+<div id="screen-discussion" class="screen">
+    <div class="discussion-icon">🗣️</div>
+    <h2>Toda a gente já viu a sua carta!</h2>
+    <p style="font-size:1rem; line-height:1.7;">
+        Agora cada um dá uma dica sobre a palavra secreta sem a dizer diretamente.<br>
+        Depois votem em quem acham que é o impostor!
+    </p>
 
-        <button id="btn-next-player" class="btn-primary" onclick="nextPlayer()"
-            style="display: none; margin-top: 20px;">
-            Esconder e Passar
-        </button>
-    </div>
+```
+<div class="starter-highlight" id="starter-player"></div>
 
-    <div id="screen-discussion" class="screen">
-        <h2>O telefone passou por todos!</h2>
-        <p style="font-size: 1.2rem;">Agora discutam e descubram quem é o impostor!</p>
-        
-        <p id="starter-player" class="starter-highlight"></p>
+<button class="btn-secondary" onclick="playAgainSameWords()" style="margin-top:8px;">🔄 Jogar Novamente (mesma categoria)</button>
+<button class="btn-danger" onclick="resetGame()">🏠 Voltar ao Início</button>
+```
 
-        <button class="btn-danger" onclick="resetGame()" style="margin-top: 30px; border-color: transparent;">Terminar e
-            Iniciar Novo Jogo</button>
-    </div>
+</div>
 
-    <script>
+<script>
+    const wordDatabase = {
+        "Animais": ["Cachorro","Gato","Elefante","Leão","Tubarão","Pinguim","Girafa","Macaco","Tigre","Zebra","Coelho","Galinha","Porco","Vaca","Cavalo","Cabra","Pato","Rato","Cobra","Águia","Coruja","Baleia","Golfinho","Foca","Camelo","Hipopótamo","Rinoceronte","Esquilo","Abelha","Formiga"],
+        "Comida": ["Pizza","Hambúrguer","Sushi","Lasanha","Salada","Churrasco","Sopa","Tacos","Arroz","Feijão","Macarrão","Ovo","Queijo","Presunto","Pão","Bolo","Sorvete","Chocolate","Brigadeiro","Pipoca","Batata","Cenoura","Tomate","Alface","Banana","Maçã","Uva","Laranja","Morango","Melancia"],
+        "Países": ["Brasil","Moçambique","Japão","Canadá","França","Austrália","Angola","Portugal","Argentina","Chile","México","Estados Unidos","Inglaterra","Espanha","Itália","Alemanha","China","Índia","Rússia","África do Sul","Egito","Grécia","Suécia","Noruega","Tailândia","Coreia do Sul","Cuba","Peru","Colômbia","Turquia"],
+        "Profissões": ["Médico","Professor","Engenheiro","Bombeiro","Programador","Polícia","Padeiro","Advogado","Dentista","Veterinário","Jornalista","Motorista","Cozinheiro","Garçom","Mecânico","Eletricista","Carpinteiro","Pintor","Jardineiro","Carteiro","Farmacêutico","Enfermeiro","Arquiteto","Designer","Cantor","Ator","Escritor","Piloto","Cientista","Vendedor"],
+        "Objetos da Casa": ["Sofá","Televisão","Geladeira","Cama","Micro-ondas","Mesa","Cadeira","Fogão","Liquidificador","Ventilador","Abajur","Tapete","Cortina","Almofada","Espelho","Vassoura","Rodo","Balde","Sabonete","Toalha","Escova de Dente","Pente","Tesoura","Panela","Prato","Copo","Garfo","Faca","Colher","Computador"],
+        "Frutas": ["Maçã","Banana","Laranja","Uva","Morango","Melancia","Abacaxi","Manga","Pera","Pêssego","Kiwi","Limão","Coco","Goiaba","Acerola","Jabuticaba","Caju","Amora","Framboesa","Cereja","Tangerina","Mamão","Melão","Maracujá","Carambola","Figo","Ameixa","Damasco","Romã","Nectarina"],
+        "Desportos": ["Futebol","Basquete","Voleibol","Ténis","Natação","Atletismo","Judo","Surf","Skate","Ciclismo","Boxe","Ginástica","Andebol","Rugby","Basebol","Golfe","Hipismo","Esgrima","Canoagem","Remo","Badminton","Squash","Patinagem","Xadrez","Arco e Flecha","Levantamento de Peso","Luta","Polo Aquático","Triatlo","Alpinismo"],
+        "Roupas": ["Camisa","Calça","Vestido","Saia","Bermuda","Shorts","Blusa","Casaco","Jaqueta","Moletom","Suéter","Meia","Ténis","Sandália","Bota","Chinelo","Gravata","Cinto","Chapéu","Boné","Luva","Cachecol","Pijama","Uniforme","Lenço"],
+        "Aleatório": ["Macaco","Chapéu","Bolacha","Carro","Bicicleta","Lápis","Livro","Janela","Porta","Relógio","Telefone","Cadeado","Mochila","Carteira","Óculos","Guarda-chuva","Chave","Moeda","Bola","Pipa","Robô","Foguete","Nuvem","Estrela","Lua","Sol","Praia","Montanha","Rio","Floresta","Copo","Prato","Colher","Garfo","Mesa","Cadeira","Cama","Almofada","Cobertor","Toalha","Sabão","Escova","Pasta","Banho","Chuveiro","Espelho","Pente","Perfume","Camisa","Calça","Sapato","Meia","Boné","Casaco","Saia","Vestido","Anel","Pulseira","Brinco","Colar","Geladeira","Fogão","Panela","Faca","Forno","Microondas","Leite","Pão","Queijo","Ovo","Maçã","Banana","Uva","Laranja","Manga","Abacaxi","Melancia","Cenoura","Batata","Tomate"],
+        "Natureza": ["Sol","Lua","Estrela","Nuvem","Chuva","Vento","Arco-íris","Raio","Neve","Nevoeiro","Rio","Lago","Mar","Oceano","Cachoeira","Praia","Areia","Ilha","Baía","Recife","Montanha","Colina","Vale","Planície","Deserto","Caverna","Rochedo","Pedra","Terra","Solo","Floresta","Selva","Bosque","Árvore","Arbusto","Planta","Flor","Folha","Raiz","Tronco"],
+        "Transportes": ["Carro","Bicicleta","Moto","Autocarro","Comboio","Avião","Barco","Navio","Helicóptero","Táxi","Camião","Van","Carrinha","Metro","Elétrico","Trotinete","Patinete","Skate","Bicicleta elétrica","Motocicleta","Jato","Barco a remo","Lancha","Ferry","Submarino","Balão","Teleférico","Funicular","Trator","Ambulância","Carro de Polícia","Camião de Bombeiros","Caravana","Canoa","Caiaque"]
+    };
 
-        const wordDatabase = {
-            "Animais": [
-                "Cachorro", "Gato", "Elefante", "Leão", "Tubarão", "Pinguim", "Girafa", "Macaco",
-                "Tigre", "Zebra", "Coelho", "Galinha", "Porco", "Vaca", "Cavalo", "Cabra",
-                "Pato", "Rato", "Cobra", "Águia", "Coruja", "Baleia", "Golfinho", "Foca",
-                "Camelo", "Hipopótamo", "Rinoceronte", "Esquilo", "Abelha", "Formiga"
-            ],
-            "Comida": [
-                "Pizza", "Hambúrguer", "Sushi", "Lasanha", "Salada", "Churrasco", "Sopa", "Tacos",
-                "Arroz", "Feijão", "Macarrão", "Ovo", "Queijo", "Presunto", "Pão", "Bolo",
-                "Sorvete", "Chocolate", "Brigadeiro", "Pipoca", "Batata", "Cenoura", "Tomate", "Alface",
-                "Banana", "Maçã", "Uva", "Laranja", "Morango", "Melancia"
-            ],
-            "Países": [
-                "Brasil", "Moçambique", "Japão", "Canadá", "França", "Austrália", "Angola", "Portugal",
-                "Argentina", "Chile", "México", "Estados Unidos", "Inglaterra", "Espanha", "Itália", "Alemanha",
-                "China", "Índia", "Rússia", "África do Sul", "Egito", "Grécia", "Suécia", "Noruega",
-                "Tailândia", "Coreia do Sul", "Cuba", "Peru", "Colômbia", "Turquia"
-            ],
-            "Profissões": [
-                "Médico", "Professor", "Engenheiro", "Bombeiro", "Programador", "Polícia", "Padeiro",
-                "Advogado", "Dentista", "Veterinário", "Jornalista", "Motorista", "Cozinheiro", "Garçom",
-                "Mecânico", "Eletricista", "Carpinteiro", "Pintor", "Jardineiro", "Carteiro",
-                "Farmacêutico", "Enfermeiro", "Arquiteto", "Designer", "Cantor", "Ator", "Escritor",
-                "Piloto", "Cientista", "Vendedor"
-            ],
-            "Objetos da Casa": [
-                "Sofá", "Televisão", "Geladeira", "Cama", "Micro-ondas", "Mesa", "Cadeira",
-                "Fogão", "Liquidificador", "Ventilador", "Abajur", "Tapete", "Cortina", "Almofada",
-                "Espelho", "Vassoura", "Rodo", "Balde", "Sabonete", "Toalha",
-                "Escova de Dente", "Pente", "Tesoura", "Panela", "Prato", "Copo", "Garfo", "Faca",
-                "Colher", "Computador"
-            ],
-            "Frutas": [
-                "Maçã", "Banana", "Laranja", "Uva", "Morango", "Melancia", "Abacaxi", "Manga",
-                "Pera", "Pêssego", "Kiwi", "Limão", "Coco", "Goiaba", "Acerola", "Jabuticaba",
-                "Caju", "Amora", "Framboesa", "Cereja", "Tangerina", "Mamão", "Melão", "Maracujá",
-                "Carambola", "Figo", "Ameixa", "Damasco", "Romã", "Nectarina"
-            ],
-            "Esportes": [
-                "Futebol", "Basquete", "Vôlei", "Tênis", "Natação", "Atletismo", "Judô", "Surfe",
-                "Skate", "Ciclismo", "Boxe", "Ginástica", "Handebol", "Rúgbi", "Beisebol", "Golfe",
-                "Hipismo", "Esgrima", "Canoagem", "Remo", "Badminton", "Squash", "Patinação", "Xadrez",
-                "Arco e Flecha", "Levantamento de Peso", "Lutas", "Polo Aquático", "Triatlo", "Alpinismo"
-            ],
-            "Roupas": [
-                "Camisa", "Calça", "Vestido", "Saia", "Bermuda", "Shorts", "Blusa", "Casaco",
-                "Jaqueta", "Moletom", "Suéter", "Meia", "Tênis", "Sandália", "Bota", "Chinelo",
-                "Gravata", "Cinto", "Chapéu", "Boné", "Luva", "Cachecol", "Pijama", "Uniforme", "Lenço"
-            ],
-            "Aleatório": [
-                "Macaco", "Chapéu", "Bolacha", "Carro", "Bicicleta", "Lápis", "Livro", "Janela",
-                "Porta", "Relógio", "Telefone", "Cadeado", "Mochila", "Carteira", "Óculos", "Guarda-chuva",
-                "Chave", "Moeda", "Bola", "Pipa", "Robô", "Foguete", "Nuvem", "Estrela",
-                "Lua", "Sol", "Praia", "Montanha", "Rio", "Floresta",
-                "Copo", "Prato", "Colher", "Garfo", "Mesa", "Cadeira", "Cama", "Almofada", "Cobertor", "Toalha",
-                "Sabão", "Escova", "Pasta", "Banho", "Chuveiro", "Espelho", "Pente", "Perfume", "Camisa", "Calça",
-                "Sapato", "Meia", "Boné", "Casaco", "Saia", "Vestido", "Anel", "Pulseira", "Brinco", "Colar",
-                "Geladeira", "Fogão", "Panela", "Faca", "Forno", "Microondas", "Leite", "Pão", "Queijo", "Ovo",
-                "Maçã", "Banana", "Uva", "Laranja", "Manga", "Abacaxi", "Melancia", "Cenoura", "Batata", "Tomate"
-            ],
-            "Natureza": [
-                "Sol", "Lua", "Estrela", "Nuvem", "Chuva", "Vento", "Arco-íris", "Raio", "Neve", "Nevoeiro",
-                "Rio", "Lago", "Mar", "Oceano", "Cachoeira", "Praia", "Areia", "Ilha", "Baía", "Recife",
-                "Montanha", "Colina", "Vale", "Planície", "Deserto", "Caverna", "Rochedo", "Pedra", "Terra", "Solo",
-                "Floresta", "Selva", "Bosque", "Árvore", "Arbusto", "Planta", "Flor", "Folha", "Raiz", "Tronco",
-                "Semente", "Fruta", "Grama", "Musgo", "Liana", "Galho", "Céu", "Horizonte", "Aurora", "Pôr do sol"
-            ],
-            "Transportes": [
-                "Carro", "Bicicleta", "Moto", "Autocarro", "Comboio", "Avião", "Barco", "Navio", "Helicóptero", "Táxi",
-                "Camião", "Van", "Carrinha", "Metro", "Elétrico", "Trotinete", "Patinete", "Skate", "Bicicleta elétrica", "Motocicleta",
-                "Jato", "Avião de carga", "Barco a remo", "Lancha", "Ferry", "Submarino", "Balão", "Dirigível", "Teleférico", "Funicular",
-                "Trator", "Bulldozer", "Escavadora", "Ambulância", "Carro de polícia", "Camião de bombeiros", "Caravana", "Reboque", "Kart", "Buggy",
-                "Monotrilho", "Comboio rápido", "Avião privado", "Helicóptero de resgate", "Barco de pesca", "Navio de cruzeiro", "Jet ski", "Barco inflável", "Canoa", "Caiaque"
-            ]
-        };
+    // ==========================================
+    // ESTADO DO JOGO
+    // ==========================================
+    let players = [];
+    let currentPlayerIndex = 0;
+    let impostors = [];
+    let selectedWord = "";
+    let currentCategory = "";
 
-        const cardColors = ['#FDE047', '#6EE7B7', '#93C5FD', '#F9A8D4', '#C4B5FD', '#FDBA74', '#D9F99D'];
+    // Palavras personalizadas — persistem durante toda a sessão
+    let customWordsArray = [];
 
-        // ==========================================
-        // 2. VARIÁVEIS DO JOGO
-        // ==========================================
-        let players = [];
-        let currentPlayerIndex = 0;
-        let impostors = []; 
-        let selectedWord = "";
-        let isCardRevealed = false;
-        let customWordsArray = []; // Array para as palavras criadas pelo utilizador
+    // ==========================================
+    // NAVEGAÇÃO
+    // ==========================================
+    function goToScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
 
-        // ==========================================
-        // 3. NAVEGAÇÃO E JOGADORES
-        // ==========================================
-        function goToScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
+    function handleEnter(e) { if (e.key === 'Enter') addPlayer(); }
+
+    // ==========================================
+    // JOGADORES
+    // ==========================================
+    function addPlayer() {
+        const input = document.getElementById('player-input');
+        const name = input.value.trim();
+        if (!name) return;
+        players.push(name);
+        input.value = "";
+        updatePlayerList();
+    }
+
+    function removePlayer(index) { players.splice(index, 1); updatePlayerList(); }
+
+    function updatePlayerList() {
+        const ul = document.getElementById('player-list-ul');
+        ul.innerHTML = "";
+        players.forEach((p, i) => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span>${p}</span><button class="remove-btn" onclick="removePlayer(${i})">✖</button>`;
+            ul.appendChild(li);
+        });
+    }
+
+    function goToCategories() {
+        const num = parseInt(document.getElementById('num-impostors').value);
+        if (players.length < 3) { alert("Precisas de pelo menos 3 jogadores!"); return; }
+        if (players.length <= num) { alert(`Tens ${players.length} jogadores. O número de impostores (${num}) tem de ser menor do que o total de jogadores!`); return; }
+        loadCategories();
+        goToScreen('screen-categories');
+    }
+
+    function loadCategories() {
+        const container = document.getElementById('categories-container');
+        container.innerHTML = "";
+        let i = 0;
+        for (const cat in wordDatabase) {
+            if (cat === "Minhas Palavras") continue;
+            const btn = document.createElement('button');
+            btn.className = `cat-btn-${i % 11}`;
+            btn.style.borderRadius = "12px";
+            btn.innerText = cat;
+            btn.onclick = () => {
+                if (cat === "Aleatório") goToScreen('screen-random-choice');
+                else startGame(cat);
+            };
+            container.appendChild(btn);
+            i++;
         }
+    }
 
-        function handleEnter(e) {
-            if (e.key === 'Enter') addPlayer();
+    // ==========================================
+    // PALAVRAS PERSONALIZADAS
+    // ==========================================
+    function showCustomWordsScreen() {
+        // NÃO apagamos as palavras — só actualizamos a lista visual
+        updateCustomWordsList();
+        goToScreen('screen-custom-words');
+    }
+
+    function addCustomWord() {
+        const input = document.getElementById('custom-word-input');
+        const word = input.value.trim();
+        if (!word) return;
+        if (customWordsArray.length >= 50) { alert("Já atingiste o limite de 50 palavras!"); return; }
+        if (customWordsArray.map(w => w.toLowerCase()).includes(word.toLowerCase())) { alert("Essa palavra já está na lista!"); return; }
+        customWordsArray.push(word);
+        input.value = "";
+        updateCustomWordsList();
+    }
+
+    function removeCustomWord(i) { customWordsArray.splice(i, 1); updateCustomWordsList(); }
+
+    function updateCustomWordsList() {
+        const ul = document.getElementById('custom-words-list');
+        ul.innerHTML = "";
+        customWordsArray.forEach((w, i) => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span>${w}</span><button class="remove-btn" onclick="removeCustomWord(${i})">✖</button>`;
+            ul.appendChild(li);
+        });
+        document.getElementById('custom-words-count').innerText = customWordsArray.length;
+
+        // Actualiza aviso no ecrã aleatório
+        const notice = document.getElementById('saved-words-notice');
+        const countEl = document.getElementById('saved-words-count');
+        if (customWordsArray.length > 0) {
+            notice.style.display = 'block';
+            countEl.innerText = customWordsArray.length;
+        } else {
+            notice.style.display = 'none';
         }
+    }
 
-        function addPlayer() {
-            const input = document.getElementById('player-input');
-            const name = input.value.trim();
-            if (name) {
-                players.push(name);
-                input.value = "";
-                updatePlayerList();
-            }
+    function startCustomGame() {
+        if (customWordsArray.length < 5) {
+            alert(`Precisas de pelo menos 5 palavras para jogar. Tens ${customWordsArray.length}.`);
+            return;
         }
+        wordDatabase["Minhas Palavras"] = [...customWordsArray];
+        startGame("Minhas Palavras");
+    }
 
-        function removePlayer(index) {
-            players.splice(index, 1);
-            updatePlayerList();
+    // ==========================================
+    // LÓGICA DO JOGO
+    // ==========================================
+    function startGame(category) {
+        currentCategory = category;
+        const num = parseInt(document.getElementById('num-impostors').value);
+        const words = wordDatabase[category];
+        selectedWord = words[Math.floor(Math.random() * words.length)];
+        impostors = [];
+        while (impostors.length < num) {
+            let r = Math.floor(Math.random() * players.length);
+            if (!impostors.includes(r)) impostors.push(r);
         }
+        currentPlayerIndex = 0;
+        showPlayerCard();
+    }
 
-        function updatePlayerList() {
-            const ul = document.getElementById('player-list-ul');
-            ul.innerHTML = "";
-            players.forEach((p, index) => {
-                const li = document.createElement('li');
-                li.innerHTML = `<span>${p}</span> <span style="color:red; cursor:pointer;" onclick="removePlayer(${index})">✖</span>`;
-                ul.appendChild(li);
-            });
-        }
-
-        function goToCategories() {
-            const numImpostors = parseInt(document.getElementById('num-impostors').value);
-
-            if (players.length < 3) {
-                alert("Precisas de pelo menos 3 jogadores para jogar!");
-                return;
-            }
-            if (players.length <= numImpostors) {
-                alert(`Tens ${players.length} jogadores. O número de impostores (${numImpostors}) tem de ser menor que o total de jogadores!`);
-                return;
-            }
-
-            loadCategories();
-            goToScreen('screen-categories');
-        }
-
-        function loadCategories() {
-            const container = document.getElementById('categories-container');
-            container.innerHTML = "";
-
-            for (const category in wordDatabase) {
-                // Se existir uma categoria "Minhas Palavras" antiga, não a mostramos no menu padrão
-                if (category === "Minhas Palavras") continue;
-
-                const btn = document.createElement('button');
-                btn.className = "btn-secondary";
-                btn.innerText = category;
-                btn.onclick = () => {
-                    // SE O CLIQUE FOR NO ALEATÓRIO, MUDA DE TELA
-                    if (category === "Aleatório") {
-                        goToScreen('screen-random-choice');
-                    } else {
-                        startGame(category);
-                    }
-                };
-                container.appendChild(btn);
-            }
-        }
-
-        // ==========================================
-        // 3.5. LÓGICA DE PALAVRAS PERSONALIZADAS
-        // ==========================================
-        function showCustomWordsScreen() {
-            customWordsArray = []; // Limpa sempre que abre
-            updateCustomWordsList();
-            goToScreen('screen-custom-words');
-        }
-
-        function addCustomWord() {
-            const input = document.getElementById('custom-word-input');
-            const word = input.value.trim();
-
-            if (word && customWordsArray.length < 50) {
-                // Verifica se já existe (ignorando maiúsculas e minúsculas)
-                if (customWordsArray.map(w => w.toLowerCase()).includes(word.toLowerCase())) {
-                    alert("Esta palavra já foi adicionada!");
-                    return;
-                }
-                customWordsArray.push(word);
-                input.value = "";
-                updateCustomWordsList();
-            } else if (customWordsArray.length >= 50) {
-                alert("Atingiste o limite máximo de 50 palavras.");
-            }
-        }
-
-        function removeCustomWord(index) {
-            customWordsArray.splice(index, 1);
-            updateCustomWordsList();
-        }
-
-        function updateCustomWordsList() {
-            const ul = document.getElementById('custom-words-list');
-            ul.innerHTML = "";
-            customWordsArray.forEach((w, index) => {
-                const li = document.createElement('li');
-                li.innerHTML = `<span>${w}</span> <span style="color:red; cursor:pointer;" onclick="removeCustomWord(${index})">✖</span>`;
-                ul.appendChild(li);
-            });
-            document.getElementById('custom-words-count').innerText = customWordsArray.length;
-        }
-
-        function startCustomGame() {
-            if (customWordsArray.length < 5) {
-                alert(`Precisas de pelo menos 5 palavras para jogar. Tens atualmente ${customWordsArray.length}.`);
-                return;
-            }
-            // Adiciona a lista criada ao banco de dados e inicia o jogo
-            wordDatabase["Minhas Palavras"] = [...customWordsArray];
+    // Jogar novamente com a mesma categoria (palavras personalizadas mantêm-se)
+    function playAgainSameWords() {
+        if (currentCategory === "Minhas Palavras" && customWordsArray.length >= 5) {
             startGame("Minhas Palavras");
-        }
-
-        // ==========================================
-        // 4. LÓGICA DO JOGO
-        // ==========================================
-        function startGame(categoryName) {
-            const numImpostors = parseInt(document.getElementById('num-impostors').value);
-
-            // Sorteia a Palavra
-            const wordsArray = wordDatabase[categoryName];
-            const randomWordIndex = Math.floor(Math.random() * wordsArray.length);
-            selectedWord = wordsArray[randomWordIndex];
-
-            // Sorteia os Impostores
-            impostors = [];
-            while (impostors.length < numImpostors) {
-                let randomPlayer = Math.floor(Math.random() * players.length);
-                if (!impostors.includes(randomPlayer)) {
-                    impostors.push(randomPlayer);
-                }
-            }
-
-            currentPlayerIndex = 0;
-            showPlayerCard();
-        }
-
-        function showPlayerCard() {
-            if (currentPlayerIndex >= players.length) {
-                // CORREÇÃO DO BUG: Garantir que a tela volta à cor normal antes da discussão
-                document.body.style.backgroundColor = "var(--bg-color)";
-
-                // NOVA FUNCIONALIDADE: Escolher quem começa a rodada
-                const randomStarter = players[Math.floor(Math.random() * players.length)];
-                document.getElementById('starter-player').innerText = `${randomStarter} começa a rodada!`;
-
-                goToScreen('screen-discussion');
-                return;
-            }
-
-            isCardRevealed = false;
-
-            // Resetar cores da tela e do texto para o padrão
-            document.body.style.backgroundColor = "var(--bg-color)";
-            const card = document.getElementById('player-card');
-            card.style.color = "var(--text-dark)";
-
-            // Escolher cor do cartão baseada no jogador
-            const colorIndex = currentPlayerIndex % cardColors.length;
-            card.style.backgroundColor = cardColors[colorIndex];
-
-            // Atualizar textos
-            document.getElementById('card-player-name').innerText = players[currentPlayerIndex];
-            document.getElementById('card-instruction').style.display = "block";
-
-            // Mostrar ação e esconder palavra
-            document.getElementById('card-action').style.display = "block";
-            document.getElementById('card-word').style.display = "none";
-            document.getElementById('btn-next-player').style.display = "none";
-
-            goToScreen('screen-card');
-        }
-
-        function revealCard() {
-            if (isCardRevealed) return; // Evita duplo clique
-            isCardRevealed = true;
-
-            const card = document.getElementById('player-card');
-            const wordDisplay = document.getElementById('card-word');
-
-            // Esconde a mãozinha e a instrução
-            document.getElementById('card-action').style.display = "none";
-            document.getElementById('card-instruction').style.display = "none";
-            wordDisplay.style.display = "block";
-
-            // Verifica se é impostor
-            if (impostors.includes(currentPlayerIndex)) {
-                wordDisplay.innerText = "VOCÊ É O IMPOSTOR!";
-
-                // TELA INTEIRA VERMELHA
-                document.body.style.backgroundColor = "var(--danger)";
-                card.style.backgroundColor = "var(--danger)"; // Fundo do cartão igual
-                card.style.color = "#FFFFFF"; // Texto branco para contrastar
-
-            } else {
-                wordDisplay.innerText = selectedWord;
-            }
-
-            // Mostra o botão para passar ao próximo
-            document.getElementById('btn-next-player').style.display = "block";
-        }
-
-        function nextPlayer() {
-            currentPlayerIndex++;
-            showPlayerCard();
-        }
-
-        function resetGame() {
-            currentPlayerIndex = 0;
-            impostors = [];
-            selectedWord = "";
-            document.body.style.backgroundColor = "var(--bg-color)";
+        } else if (currentCategory && currentCategory !== "Minhas Palavras") {
+            startGame(currentCategory);
+        } else {
             goToScreen('screen-categories');
         }
-    </script>
-</body>
+    }
 
+    const cardThemes = ['card-theme-0','card-theme-1','card-theme-2','card-theme-3','card-theme-4','card-theme-5','card-theme-6'];
+
+    function showPlayerCard() {
+        if (currentPlayerIndex >= players.length) {
+            const starter = players[Math.floor(Math.random() * players.length)];
+            document.getElementById('starter-player').innerText = `⚡ ${starter} começa a rodada!`;
+            goToScreen('screen-discussion');
+            return;
+        }
+
+        const card = document.getElementById('player-card');
+        card.className = 'card-container ' + cardThemes[currentPlayerIndex % cardThemes.length];
+
+        document.getElementById('card-player-name').innerText = players[currentPlayerIndex];
+        document.getElementById('card-instruction').style.display = '';
+        document.getElementById('card-action').style.display = 'block';
+        document.getElementById('card-word').style.display = 'none';
+        document.getElementById('card-impostor').style.display = 'none';
+        document.getElementById('tap-hint').style.display = 'block';
+
+        goToScreen('screen-card');
+    }
+
+    // ====== TOCA PARA REVELAR / SOLTA PARA ESCONDER ======
+    function setupCardEvents() {
+        const card = document.getElementById('player-card');
+        card.addEventListener('mousedown', onPressStart);
+        document.addEventListener('mouseup', onPressEnd);
+        card.addEventListener('touchstart', onPressStart, { passive: false });
+        document.addEventListener('touchend', onPressEnd);
+        document.addEventListener('touchcancel', onPressEnd);
+    }
+
+    function onPressStart(e) {
+        e.preventDefault();
+        showWord();
+    }
+
+    function onPressEnd(e) {
+        const btn = document.getElementById('btn-next-player');
+        const target = e.target || e.changedTouches?.[0]?.target;
+        if (target && (target === btn || btn.contains(target))) return;
+        hideWord();
+    }
+
+    function showWord() {
+        const card = document.getElementById('player-card');
+        document.getElementById('card-action').style.display = 'none';
+        document.getElementById('card-instruction').style.display = 'none';
+        document.getElementById('tap-hint').style.display = 'none';
+
+        if (impostors.includes(currentPlayerIndex)) {
+            card.className = 'card-container card-impostor';
+            document.getElementById('card-impostor').style.display = 'block';
+        } else {
+            document.getElementById('card-word').innerText = selectedWord;
+            document.getElementById('card-word').style.display = 'block';
+        }
+    }
+
+    function hideWord() {
+        const card = document.getElementById('player-card');
+        card.className = 'card-container ' + cardThemes[currentPlayerIndex % cardThemes.length];
+        document.getElementById('card-action').style.display = 'block';
+        document.getElementById('card-instruction').style.display = '';
+        document.getElementById('tap-hint').style.display = 'block';
+        document.getElementById('card-word').style.display = 'none';
+        document.getElementById('card-impostor').style.display = 'none';
+    }
+
+    function nextPlayer() {
+        currentPlayerIndex++;
+        showPlayerCard();
+    }
+
+    function resetGame() {
+        currentPlayerIndex = 0;
+        impostors = [];
+        selectedWord = "";
+        currentCategory = "";
+        // Palavras personalizadas ficam guardadas — não são apagadas
+        goToScreen('screen-home');
+    }
+
+    setupCardEvents();
+</script>
+
+</body>
 </html>
